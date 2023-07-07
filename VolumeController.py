@@ -1,9 +1,9 @@
+from HandDetector import HandDetector
+
 import cv2
 import math
 import numpy as np
 import platform
-from HandDetector import HandDetector
-
 class VolumeController:
     def __init__(self, webcam):
         self.webcamFeed = webcam
