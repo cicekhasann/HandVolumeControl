@@ -25,7 +25,7 @@ def main():
 
         if(len(handLandmarks) != 0):
             #for volume control we need 4th and 8th landmark
-            #details: https://google.github.io/mediapipe/solutions/hands
+            #details: https://developers.google.com/mediapipe/solutions/vision/hand_landmarker
             x1, y1 = handLandmarks[4][1], handLandmarks[4][2]
             x2, y2 = handLandmarks[8][1], handLandmarks[8][2]
             length = math.hypot(x2-x1, y2-y1)
