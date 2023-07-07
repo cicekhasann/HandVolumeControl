@@ -1,12 +1,15 @@
-from HandDetector import HandDetector
-
 import cv2
 import math
 import numpy as np
 import platform
+import keyboard
+import time
+from HandDetector import HandDetector
+
+
 class VolumeController:
-    def __init__(self, webcam):
-        self.webcamFeed = webcam
+    def __init__(self):
+        self.webcamFeed = None
         self.handDetector = HandDetector(min_detection_confidence=0.7)
         self.volume_control = self.initialize_volume_control()
 
@@ -31,8 +34,25 @@ class VolumeController:
 
     def run(self):
         while True:
-            status, image = self.webcamFeed.read()
+            if keyboard.is_pressed('shift+f4'):  # if keyboard.is_pressed('shift') and keyboard.is_pressed('f4'):
+                self.process_volume_control()
+
+            if keyboard.is_pressed('ctrl+q'):
+                break
+
+    def process_volume_control(self):
+        webcamFeed = cv2.VideoCapture(0)
+        start_time = time.time()
+
+        while True:
+            status, image = webcamFeed.read()
             image = cv2.flip(image, 1)
+
+            elapsed_time = time.time() - start_time
+            if elapsed_time >= 5:
+                webcamFeed.release()
+                break
+
             handLandmarks = self.handDetector.findHandLandMarks(image=image, draw=True)
 
             if len(handLandmarks) != 0:
@@ -45,23 +65,19 @@ class VolumeController:
                 # Volume Range: (-65.25, 0.0) for Windows, 0-100 for Linux
 
                 if platform.system() == 'Windows':
-                    volumeValue = np.interp(length, [50, 250], [-65.25, 0.0])  # converting length to proportionate to volume range
+                    volumeValue = np.interp(length, [50, 250],
+                                            [-65.25, 0.0])  # converting length to proportionate to volume range
                     self.volume_control.SetMasterVolumeLevel(volumeValue, None)
                 elif platform.system() == 'Linux':
-                    volumeValue = np.interp(length, [50, 250], [0, 100])  # converting length to proportionate to volume range
+                    volumeValue = np.interp(length, [50, 250],
+                                            [0, 100])  # converting length to proportionate to volume range
                     self.set_system_volume(volumeValue)
-
-                cv2.circle(image, (x1, y1), 15, (255, 0, 255), cv2.FILLED)
-                cv2.circle(image, (x2, y2), 15, (255, 0, 255), cv2.FILLED)
-                cv2.line(image, (x1, y1), (x2, y2), (255, 0, 255), 3)
 
             cv2.imshow("Volume", image)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        self.webcamFeed.release()
         cv2.destroyAllWindows()
 
     def set_system_volume(self, volume_value):
         self.volume_control.setvolume(int(volume_value))
-
