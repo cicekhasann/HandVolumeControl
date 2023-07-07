@@ -16,6 +16,8 @@ IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
 volume = cast(interface, POINTER(IAudioEndpointVolume))
 #print(volume.GetVolumeRange()) --> (-65.25, 0.0)
 
+# TODO: Seperate VolumeController.py from main.py
+
 while True:
     status, image = webcamFeed.read()
     handLandmarks = handDetector.findHandLandMarks(image=image, draw=True)
